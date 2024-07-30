@@ -14,10 +14,6 @@ import { UserMessage } from './stocks/message'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
-interface ExampleMessage {
-  message: string;
-}
-
 export interface ChatPanelProps {
   id?: string
   title?: string
@@ -39,13 +35,13 @@ export function ChatPanel({
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [exampleMessages, setExampleMessages] = useState<ExampleMessage[]>([])
+  const [exampleMessages, setExampleMessages] = useState([])
   const [showExamples, setShowExamples] = useState(true)
 
   useEffect(() => {
     fetch('/questions.json')
       .then(response => response.json())
-      .then((data: ExampleMessage[]) => {
+      .then(data => {
         setExampleMessages(data)
       })
       .catch(error => {
@@ -152,12 +148,7 @@ export function ChatPanel({
   )
 }
 
-interface ExampleItemProps {
-  example: ExampleMessage;
-  onClick: () => void;
-}
-
-function ExampleItem({ example, onClick }: ExampleItemProps) {
+function ExampleItem({ example, onClick }) {
   return (
     <div
       className={cn(
