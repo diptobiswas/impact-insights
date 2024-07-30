@@ -14,6 +14,11 @@ import { UserMessage } from './stocks/message'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
+// Add this type definition at the top of the file
+type ExampleMessage = {
+  message: string;
+};
+
 export interface ChatPanelProps {
   id?: string
   title?: string
@@ -35,7 +40,7 @@ export function ChatPanel({
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [exampleMessages, setExampleMessages] = useState([])
+  const [exampleMessages, setExampleMessages] = useState<ExampleMessage[]>([])
   const [showExamples, setShowExamples] = useState(true)
 
   useEffect(() => {
@@ -148,7 +153,7 @@ export function ChatPanel({
   )
 }
 
-function ExampleItem({ example, onClick }) {
+function ExampleItem({ example, onClick }: { example: ExampleMessage; onClick: () => void }) {
   return (
     <div
       className={cn(
