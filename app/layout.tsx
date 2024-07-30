@@ -12,11 +12,10 @@ import { KasadaClient } from '@/lib/kasada/kasada-client'
 export const metadata = {
   metadataBase: new URL('https://gemini.vercel.ai'),
   title: {
-    default: 'Next.js Gemini Chatbot',
-    template: `%s - Next.js Gemini Chatbot`
+    default: 'Impact Insights',
   },
   description:
-    'Build your own generative UI chatbot using the Vercel AI SDK and Google Gemini',
+    'Find initiatives that impact you',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
@@ -54,10 +53,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-screen">
-            <Header />
+            {/* <Header /> */}
             <main className="flex flex-col flex-1">{children}</main>
           </div>
-          <TailwindIndicator />
+          {/* <TailwindIndicator /> */}
         </Providers>
         <Analytics />
       </body>

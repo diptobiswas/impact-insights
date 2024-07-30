@@ -1,5 +1,5 @@
 import * as React from 'react'
-
+import { useState, useEffect } from 'react'
 import { shareChat } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
@@ -13,6 +13,10 @@ import { nanoid } from 'nanoid'
 import { UserMessage } from './stocks/message'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+
+interface ExampleMessage {
+  message: string;
+}
 
 export interface ChatPanelProps {
   id?: string
@@ -34,20 +38,65 @@ export function ChatPanel({
   const [aiState] = useAIState()
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
-  const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [exampleMessages, setExampleMessages] = useState<ExampleMessage[]>([])
+  const [showExamples, setShowExamples] = useState(true)
 
-  const exampleMessages = [
-    {
-      heading: 'List flights flying from',
-      subheading: 'San Francisco to Rome today',
-      message: `List flights flying from San Francisco to Rome today`
-    },
-    {
-      heading: 'What is the status',
-      subheading: 'of flight BA142?',
-      message: 'What is the status of flight BA142?'
+  useEffect(() => {
+    fetch('/questions.json')
+      .then(response => response.json())
+      .then((data: ExampleMessage[]) => {
+        setExampleMessages(data)
+      })
+      .catch(error => {
+        console.error('Error fetching example messages:', error)
+      })
+  }, [])
+
+  const handleExampleClick = async (message: string) => {
+    setShowExamples(false)
+    setMessages(currentMessages => [
+      ...currentMessages,
+      {
+        id: nanoid(),
+        display: <UserMessage>{message}</UserMessage>
+      }
+    ])
+
+    try {
+      const responseMessage = await submitUserMessage(message)
+
+      setMessages(currentMessages => [
+        ...currentMessages,
+        responseMessage
+      ])
+    } catch {
+      toast(
+        <div className="text-red-600">
+          You have reached your message limit!
+          Please try again later.
+        </div>
+      )
     }
-  ]
+  }
+
+  const renderColumn = (startIndex: number) => (
+    <div className={cn(
+      "flex-1 overflow-hidden h-48 relative",
+      startIndex === 2 ? "hidden sm:block" : ""  // Hide the third column on mobile
+    )}>
+      <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
+      <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-10"></div>
+      <div className={`scroll-content space-y-4 animate-scroll-${startIndex}`}>
+        {exampleMessages.slice(startIndex).map((example, index) => (
+          <ExampleItem key={index} example={example} onClick={() => handleExampleClick(example.message)} />
+        ))}
+        {exampleMessages.slice(startIndex).map((example, index) => (
+          <ExampleItem key={`duplicate-${index}`} example={example} onClick={() => handleExampleClick(example.message)} />
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <div className="fixed inset-x-0 bg-white/90 bottom-0 w-full duration-300 ease-in-out peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px] dark:from-10%">
@@ -56,60 +105,14 @@ export function ChatPanel({
         scrollToBottom={scrollToBottom}
       />
 
-      <div className="mx-auto sm:max-w-2xl sm:px-4">
-        <div className="mb-4 grid sm:grid-cols-2 gap-2 sm:gap-4 px-4 sm:px-0">
-          {messages.length === 0 &&
-            exampleMessages.map((example, index) => (
-              <div
-                key={example.heading}
-                className={cn(
-                  'cursor-pointer bg-zinc-50 text-zinc-950 rounded-2xl p-4 sm:p-6 hover:bg-zinc-100 transition-colors',
-                  index > 1 && 'hidden md:block'
-                )}
-                onClick={async () => {
-                  setMessages(currentMessages => [
-                    ...currentMessages,
-                    {
-                      id: nanoid(),
-                      display: <UserMessage>{example.message}</UserMessage>
-                    }
-                  ])
-
-                  try {
-                    const responseMessage = await submitUserMessage(
-                      example.message
-                    )
-
-                    setMessages(currentMessages => [
-                      ...currentMessages,
-                      responseMessage
-                    ])
-                  } catch {
-                    toast(
-                      <div className="text-red-600">
-                        You have reached your message limit! Please try again
-                        later, or{' '}
-                        <a
-                          className="underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href="https://vercel.com/templates/next.js/gemini-ai-chatbot"
-                        >
-                          deploy your own version
-                        </a>
-                        .
-                      </div>
-                    )
-                  }
-                }}
-              >
-                <div className="font-medium">{example.heading}</div>
-                <div className="text-sm text-zinc-800">
-                  {example.subheading}
-                </div>
-              </div>
-            ))}
-        </div>
+      <div className="mx-auto sm:max-w-2xl sm:px-4 px-0">
+        {showExamples && (
+          <div className="mb-4 px-0 sm:px-0 flex space-x-4">
+            {renderColumn(0)}
+            {renderColumn(1)}
+            {renderColumn(2)}
+          </div>
+        )}
 
         {messages?.length >= 2 ? (
           <div className="flex h-fit items-center justify-center">
@@ -148,3 +151,23 @@ export function ChatPanel({
     </div>
   )
 }
+
+interface ExampleItemProps {
+  example: ExampleMessage;
+  onClick: () => void;
+}
+
+function ExampleItem({ example, onClick }: ExampleItemProps) {
+  return (
+    <div
+      className={cn(
+        'cursor-pointer bg-zinc-50 text-zinc-950 rounded-2xl p-4 sm:p-6 hover:bg-zinc-100 transition-colors'
+      )}
+      onClick={onClick}
+    >
+      <div className="font-medium break-words">{example.message}</div>
+    </div>
+  )
+}
+
+export default ChatPanel;

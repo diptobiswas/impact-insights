@@ -1,33 +1,23 @@
 import { ExternalLink } from '@/components/external-link'
+import Image from 'next/image'
 
 export function EmptyScreen() {
   return (
     <div className="mx-auto max-w-2xl px-4">
-      <div className="flex flex-col gap-2 rounded-2xl bg-zinc-50 sm:p-8 p-4 text-sm sm:text-base">
-        <h1 className="text-2xl sm:text-3xl tracking-tight font-semibold max-w-fit inline-block">
-          Next.js Gemini Chatbot
+      <div className="flex flex-col gap-2 rounded-2xl sm:p-8 p-4 text-sm sm:text-base items-center">
+        <Image
+            src="/images/un-hero.png"
+            alt="UN Hero"
+            className="rounded-lg -my-2"
+            width={200} // specify width
+            height={50} // specify height
+          />
+        <h1 className="text-2xl sm:text-3xl tracking-tight font-semibold max-w-fit inline-block text-center">
+        Find the initiatives that impact you
         </h1>
-        <p className="leading-normal text-zinc-900">
-          This is an open source AI chatbot app template built with{' '}
-          <ExternalLink href="https://nextjs.org">Next.js</ExternalLink>, the{' '}
-          <ExternalLink href="https://sdk.vercel.ai">
-            Vercel AI SDK
-          </ExternalLink>
-          , and{' '}
-          <ExternalLink href="https://ai.google.dev">
-            Google Gemini
-          </ExternalLink>
-          .
-        </p>
-        <p className="leading-normal text-zinc-900">
-          It uses{' '}
-          <ExternalLink href="https://vercel.com/blog/ai-sdk-3-generative-ui">
-            React Server Components
-          </ExternalLink>{' '}
-          with function calling to mix both text with generative UI responses
-          from Gemini. The UI state is synced through the AI SDK so the model is
-          always aware of your stateful interactions as they happen in the
-          browser.
+        <p className="leading-normal text-zinc-500 text-center">
+        This is an experimental prototype designed to use AI to provide answers about case studies and best practices for improving quality of life.
+        Please confirm any information with the original sources to ensure accuracy.
         </p>
       </div>
     </div>
