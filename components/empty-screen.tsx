@@ -8,9 +8,9 @@ export function EmptyScreen() {
         <Image
             src="/images/un-hero.png"
             alt="UN Hero"
-            className="rounded-lg -my-8 sm:-my-4 "
-            width={250} // specify width
-            height={50} // specify height
+            className="rounded-lg -my-8 sm:-my-4 w-[200px] sm:w-[250px] h-auto"
+            width={250}
+            height={50}
           />
         <h1 className="text-2xl sm:text-3xl tracking-tight font-semibold max-w-fit inline-block text-center">
         Find the initiatives that impact you
