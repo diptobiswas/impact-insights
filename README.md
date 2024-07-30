@@ -1,10 +1,9 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Next.js 14 and App Router-ready AI chatbot." src="https://gemini-chatbot.vercel.rocks/og.png">
-  <h1 align="center">Next.js AI Chatbot</h1>
+<a href="https://impact-insights.vercel.app/">
+  <h1 align="center">Impact Insights</h1>
 </a>
 
 <p align="center">
-  An open-source AI chatbot app template built with Next.js, the Vercel AI SDK, Google Gemini, and Vercel KV.
+  Find the insights that impact you!
 </p>
 
 <p align="center">
