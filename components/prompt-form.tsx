@@ -57,7 +57,7 @@ export function PromptForm({
         await onSubmit(value)
       }}
     >
-      <input
+      {/* <input
         type="file"
         className="hidden"
         id="file"
@@ -90,7 +90,7 @@ export function PromptForm({
             }
           }
         }}
-      />
+      /> */}
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-zinc-100 px-12 sm:rounded-full sm:px-12">
         {/* <Tooltip>
           <TooltipTrigger asChild> */}
@@ -99,7 +99,8 @@ export function PromptForm({
           size="icon"
           className="absolute left-4 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4"
           onClick={() => {
-            fileRef.current?.click()
+            // Navigate to the root page to start a new chat
+            window.location.href = '/';
           }}
         >
           <IconPlus />
@@ -112,7 +113,7 @@ export function PromptForm({
           ref={inputRef}
           tabIndex={0}
           onKeyDown={onKeyDown}
-          placeholder="Send a message."
+          placeholder="Ask your question here"
           className="min-h-[60px] w-full bg-transparent placeholder:text-zinc-900 resize-none px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
           autoFocus
           spellCheck={false}
@@ -133,10 +134,10 @@ export function PromptForm({
                 className="bg-transparent shadow-none text-zinc-950 rounded-full hover:bg-zinc-200"
               >
                 <IconArrowElbow />
-                <span className="sr-only">Send message</span>
+                <span className="sr-only">Ask a question</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Send message</TooltipContent>
+            <TooltipContent>Ask a question</TooltipContent>
           </Tooltip>
         </div>
       </div>

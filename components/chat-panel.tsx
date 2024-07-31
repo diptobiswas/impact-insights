@@ -58,6 +58,9 @@ export function ChatPanel({
 
   const handleExampleClick = async (message: string) => {
     setShowExamples(false)
+    setIsSubmitting(true)
+    setIsSearching(true)
+
     setMessages(currentMessages => [
       ...currentMessages,
       {
@@ -80,6 +83,9 @@ export function ChatPanel({
           Please try again later.
         </div>
       )
+    } finally {
+      setIsSubmitting(false)
+      setIsSearching(false)
     }
   }
 
@@ -114,7 +120,8 @@ export function ChatPanel({
       setIsSearching(false)
     }
   }
-
+  
+  //Infinite scroll example questions
   const renderColumn = (startIndex: number) => (
     <div className={cn(
       "flex-1 overflow-hidden relative",
@@ -144,7 +151,7 @@ export function ChatPanel({
       />
 
       <div className="mx-auto sm:max-w-2xl sm:px-4 px-0">
-        {showExamples && (
+        {showExamples && messages.length === 0 && (
           <div className="mb-4 px-0 sm:px-0 flex space-x-4">
             {renderColumn(0)}
             {renderColumn(1)}
