@@ -36,12 +36,13 @@ export function ChatPanel({
   isAtBottom,
   scrollToBottom
 }: ChatPanelProps) {
-  const [aiState] = useAIState()
+  const [aiState, setAIState] = useAIState()
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [exampleMessages, setExampleMessages] = useState<ExampleMessage[]>([])
   const [showExamples, setShowExamples] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     fetch('/questions.json')
@@ -81,6 +82,37 @@ export function ChatPanel({
     }
   }
 
+  const handleSubmit = async (value: string) => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
+    setShowExamples(false)
+    
+    try {
+      // Optimistically add user message UI
+      setMessages(currentMessages => [
+        ...currentMessages,
+        {
+          id: nanoid(),
+          display: <UserMessage>{value}</UserMessage>
+        }
+      ])
+
+      // Submit and get response message
+      const responseMessage = await submitUserMessage(value)
+      setMessages(currentMessages => [...currentMessages, responseMessage])
+    } catch (error) {
+      console.error('Error submitting message:', error)
+      toast(
+        <div className="text-red-600">
+          An error occurred. Please try again later.
+        </div>
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const renderColumn = (startIndex: number) => (
     <div className={cn(
       "flex-1 overflow-hidden h-48 relative",
@@ -88,13 +120,15 @@ export function ChatPanel({
     )}>
       <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
       <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-10"></div>
-      <div className={`scroll-content space-y-4 animate-scroll-${startIndex}`}>
-        {exampleMessages.slice(startIndex).map((example, index) => (
-          <ExampleItem key={index} example={example} onClick={() => handleExampleClick(example.message)} />
-        ))}
-        {exampleMessages.slice(startIndex).map((example, index) => (
-          <ExampleItem key={`duplicate-${index}`} example={example} onClick={() => handleExampleClick(example.message)} />
-        ))}
+      <div className="overflow-y-auto h-full">
+        <div className={`scroll-content space-y-4 animate-scroll-${startIndex}`}>
+          {exampleMessages.slice(startIndex).map((example, index) => (
+            <ExampleItem key={index} example={example} onClick={() => handleExampleClick(example.message)} />
+          ))}
+          {exampleMessages.slice(startIndex).map((example, index) => (
+            <ExampleItem key={`duplicate-${index}`} example={example} onClick={() => handleExampleClick(example.message)} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -145,7 +179,7 @@ export function ChatPanel({
         ) : null}
 
         <div className="grid gap-4 sm:pb-4">
-          <PromptForm input={input} setInput={setInput} />
+          <PromptForm input={input} setInput={setInput} onSubmit={handleSubmit} />
           <FooterText className="hidden sm:block" />
         </div>
       </div>
