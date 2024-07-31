@@ -14,6 +14,8 @@ import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage, BotMessage } from '@/components/stocks/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
+import { retrieveRelevantCaseStudies } from './retrieval'
+import CaseStudyDisplay from '@/components/CaseStudyDisplay'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -36,19 +38,34 @@ async function submitUserMessage(content: string) {
     ]
   })
 
+  const relevantCaseStudies = await retrieveRelevantCaseStudies(content);
+  let context = '';
+
+  if (Array.isArray(relevantCaseStudies)) {
+    context = relevantCaseStudies.map(study => `${study.title}: ${study.description}`).join('\n\n');
+  } else {
+    context = "No context cannot answer query"; // This will be the "No context cannot answer query" message
+  }
+
   const spinnerStream = createStreamableUI(<SpinnerMessage />)
   const messageStream = createStreamableUI(null)
 
+  console.log("Context:", context)
+  if (!context || context.trim() === '') {
+    context = "No relevant case studies or best practices found to answer the question";
+  }
+  
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: `
-          You are an AI used to provide answers about case studies and best practices for improving quality of life.
+          content: `You are an AI used to provide answers about case studies and best practices for improving quality of life. 
           Respond to user queries and engage in conversation about case studies and best practices only.
           Your response must be concise.
+          Use the following context to inform your responses: ${context}
+          if there are no context, refuse to answer the question.
           `
         },
         ...aiState.get().messages.map((message: any) => ({
@@ -81,6 +98,13 @@ async function submitUserMessage(content: string) {
         }
       ]
     })
+
+    messageStream.update(
+      <div>
+        <BotMessage content={fullContent} />
+        <CaseStudyDisplay caseStudies={relevantCaseStudies} />
+      </div>
+    )
 
     messageStream.done()
 

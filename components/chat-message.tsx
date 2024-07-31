@@ -33,11 +33,11 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
-          className="prose break-words prose-p:leading-relaxed prose-pre:p-0"
+          className="prose break-words prose-p:leading-relaxed prose-pre:p-0 max-w-full"
           remarkPlugins={[remarkGfm, remarkMath]}
           components={{
             p({ children }) {
-              return <p className="mb-2 last:mb-0">{children}</p>
+              return <p className="mb-2 last:mb-0 whitespace-pre-wrap">{children}</p>
             },
             code({ node, inline, className, children, ...props }) {
               if (children.length) {

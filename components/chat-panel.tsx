@@ -10,7 +10,7 @@ import { ChatShareDialog } from '@/components/chat-share-dialog'
 import { useAIState, useActions, useUIState } from 'ai/rsc'
 import type { AI } from '@/lib/chat/actions'
 import { nanoid } from 'nanoid'
-import { UserMessage } from './stocks/message'
+import { UserMessage, SpinnerMessage } from './stocks/message'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -43,6 +43,7 @@ export function ChatPanel({
   const [exampleMessages, setExampleMessages] = useState<ExampleMessage[]>([])
   const [showExamples, setShowExamples] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
 
   useEffect(() => {
     fetch('/questions.json')
@@ -85,7 +86,7 @@ export function ChatPanel({
   const handleSubmit = async (value: string) => {
     if (isSubmitting) return
     setIsSubmitting(true)
-
+    setIsSearching(true)
     setShowExamples(false)
     
     try {
@@ -110,12 +111,14 @@ export function ChatPanel({
       )
     } finally {
       setIsSubmitting(false)
+      setIsSearching(false)
     }
   }
 
   const renderColumn = (startIndex: number) => (
     <div className={cn(
-      "flex-1 overflow-hidden h-48 relative",
+      "flex-1 overflow-hidden relative",
+      `h-[calc(100vh-550px)] sm:h-[calc(100vh-600px)]`,
       startIndex === 2 ? "hidden sm:block" : ""  // Hide the third column on mobile
     )}>
       <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
@@ -148,7 +151,6 @@ export function ChatPanel({
             {renderColumn(2)}
           </div>
         )}
-
         {messages?.length >= 2 ? (
           <div className="flex h-fit items-center justify-center">
             <div className="flex space-x-2">
@@ -179,6 +181,12 @@ export function ChatPanel({
         ) : null}
 
         <div className="grid gap-4 sm:pb-4">
+          {isSearching && (
+            <div className="flex items-center justify-center space-x-2">
+              <SpinnerMessage />
+              <span className="text-zinc-500">Searching case studies...</span>
+            </div>
+          )}
           <PromptForm input={input} setInput={setInput} onSubmit={handleSubmit} />
           <FooterText className="hidden sm:block" />
         </div>
