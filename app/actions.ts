@@ -30,6 +30,30 @@ export async function getChats(userId?: string | null) {
   }
 }
 
+export async function getAllChats() {
+  try {
+    const allUsers = await kv.keys('user:*')
+    let allChats: Chat[] = []
+
+    for (const userKey of allUsers) {
+      const userId = userKey.split(':')[1]
+      const userChats = await kv.zrange(`user:chat:${userId}`, 0, -1)
+      
+      for (const chatKey of userChats as string[]) {
+        const chat = await kv.hgetall<Chat>(chatKey)
+        if (chat) {
+          allChats.push(chat)
+        }
+      }
+    }
+
+    return allChats
+  } catch (error) {
+    console.error('Error fetching all chats:', error)
+    return []
+  }
+}
+
 export async function getChat(id: string, userId: string) {
   const chat = await kv.hgetall<Chat>(`chat:${id}`)
 
