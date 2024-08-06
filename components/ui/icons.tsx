@@ -91,11 +91,12 @@ function IconNextChat({
 
 function IconUN({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
-    <img
+    <Image
       src="/UN_emblem_blue.svg"
       alt="UN Emblem"
       className={cn('size-4', className)}
-      {...props}
+      width={16}
+      height={16}
     />
   )
 }

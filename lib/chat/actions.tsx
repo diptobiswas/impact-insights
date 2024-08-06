@@ -17,6 +17,8 @@ import { auth } from '@/auth'
 import { retrieveRelevantCaseStudies } from './retrieval'
 import CaseStudyDisplay from '@/components/CaseStudyDisplay'
 
+export type { Message };
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 })

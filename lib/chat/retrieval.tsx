@@ -1,8 +1,4 @@
-
-
 import OpenAI from 'openai';
-import csv from 'csv-parser';
-import fs from 'fs';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -13,28 +9,44 @@ interface CaseStudy {
   description: string;
   domain: string;
   link: string;
-  embedding?: number[];
+  embedding: number[];
 }
 
 let caseStudies: CaseStudy[] = [];
 
 async function loadCaseStudies() {
   if (caseStudies.length === 0) {
-    await new Promise<void>((resolve) => {
-      fs.createReadStream('data/case_studies.csv')
-        .pipe(csv())
-        .on('data', (row) => caseStudies.push(row))
-        .on('end', async () => {
-          // Generate embeddings for all case studies
-          for (const study of caseStudies) {
-            if (!study.embedding) {
-              const combinedText = `${study.title} ${study.description}`;
-              study.embedding = await getEmbedding(combinedText);
-            }
-          }
-          resolve();
-        });
-    });
+    try {
+      const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_API_URL;
+      const fullUrl = `${apiUrl}/api/case-studies`;
+      console.log('Fetching case studies from:', fullUrl);
+
+      const response = await fetch(fullUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+      });
+      
+      //console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      //console.log('Received data:', data);
+      
+      if (Array.isArray(data) && data.length > 0) {
+        caseStudies = data;
+      } else {
+        console.warn('Loaded case studies array is empty or not an array');
+      }
+    } catch (error) {
+      console.error('Failed to load case studies:', error);
+      caseStudies = [];
+    }
   }
 }
 
@@ -64,7 +76,7 @@ export async function retrieveRelevantCaseStudies(query: string): Promise<CaseSt
   
   const relevantCaseStudies = caseStudies.map((study) => ({
     ...study,
-    similarity: cosineSimilarity(queryEmbedding, study.embedding!)
+    similarity: cosineSimilarity(queryEmbedding, study.embedding)
   }));
 
   return relevantCaseStudies
