@@ -65,17 +65,16 @@ export function ChatPanel({
       ...currentMessages,
       {
         id: nanoid(),
-        display: <UserMessage>{message}</UserMessage>
+        content: message,
+        role: "user",
+        display: <UserMessage>{message}</UserMessage>,
+        relevantCaseStudies: []
       }
     ])
 
     try {
       const responseMessage = await submitUserMessage(message)
-
-      setMessages(currentMessages => [
-        ...currentMessages,
-        responseMessage
-      ])
+      setMessages(currentMessages => [...currentMessages, responseMessage])
     } catch {
       toast(
         <div className="text-red-600">
@@ -101,7 +100,10 @@ export function ChatPanel({
         ...currentMessages,
         {
           id: nanoid(),
-          display: <UserMessage>{value}</UserMessage>
+          content: value,
+          role: "user",
+          display: <UserMessage>{value}</UserMessage>,
+          relevantCaseStudies: []
         }
       ])
 

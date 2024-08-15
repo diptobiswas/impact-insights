@@ -99,7 +99,7 @@ export function SidebarActions({
                 startRemoveTransition(async () => {
                   const result = await removeChat({
                     id: chat.id,
-                    path: chat.path
+                    path: chat.path ?? ''
                   })
 
                   if (result && 'error' in result) {

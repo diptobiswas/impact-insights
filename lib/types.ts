@@ -3,10 +3,11 @@ import { Message } from 'ai'
 export interface Chat extends Record<string, any> {
   id: string
   title: string
-  createdAt: Date
-  userId: string
-  path: string
+  userId?: string
+  createdAt?: Date
+  path?: string
   messages: Message[]
+  relevantCaseStudies?: CaseStudy[]
   sharePath?: string
 }
 
@@ -34,4 +35,11 @@ export interface User extends Record<string, any> {
   email: string
   password: string
   salt: string
+}
+
+export interface CaseStudy {
+  title: string;
+  description: string;
+  domain: string;
+  link: string;
 }

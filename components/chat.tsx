@@ -39,12 +39,12 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
     }
   }, [id, path, session?.user, messages])
 
-  useEffect(() => {
-    const messagesLength = aiState.messages?.length
-    if (messagesLength === 2) {
-      router.refresh()
-    }
-  }, [aiState.messages, router])
+  // useEffect(() => {
+  //   const messagesLength = aiState.messages?.length
+  //   if (messagesLength === 2) {
+  //     router.refresh()
+  //   }
+  // }, [aiState.messages, router])
 
   useEffect(() => {
     setNewChatId(id)
@@ -66,7 +66,11 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
     >
       <div className={cn('pb-[200px] pt-4', className)} ref={messagesRef}>
         {messages.length ? (
-          <ChatList messages={messages} isShared={false} session={session} />
+          <ChatList 
+            messages={messages} 
+            isShared={false} 
+            session={session} 
+          />
         ) : (
           <EmptyScreen />
         )}

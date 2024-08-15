@@ -153,19 +153,30 @@ export async function shareChat(id: string) {
 }
 
 export async function saveChat(chat: Chat) {
-  const session = await auth()
-
-  if (session && session.user) {
-    const pipeline = kv.pipeline()
-    pipeline.hmset(`chat:${chat.id}`, chat)
-    pipeline.zadd(`user:chat:${chat.userId}`, {
-      score: Date.now(),
-      member: `chat:${chat.id}`
-    })
-    await pipeline.exec()
-  } else {
+  if (!chat.id) {
     return
   }
+
+  const data: Record<string, any> = {
+    id: chat.id,
+    title: chat.title || '',
+    userId: chat.userId || '',
+    createdAt: chat.createdAt ? chat.createdAt.toISOString() : '',
+    path: chat.path || '',
+    messages: JSON.stringify(chat.messages || []),
+  }
+
+  if (chat.relevantCaseStudies) {
+    data.relevantCaseStudies = JSON.stringify(chat.relevantCaseStudies)
+  }
+
+  // Filter out any key-value pairs where the value is an empty string
+  const filteredData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== '')
+  )
+
+  await kv.hmset(`chat:${chat.id}`, filteredData)
+  await kv.zadd(`user:chat:${chat.userId}`, { score: Date.now(), member: `chat:${chat.id}` })
 }
 
 export async function refreshHistory(path: string) {

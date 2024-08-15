@@ -80,6 +80,6 @@ export async function retrieveRelevantCaseStudies(query: string): Promise<CaseSt
   }));
 
   return relevantCaseStudies
-    .filter(study => study.similarity > 0.85)
+    .filter(study => study.similarity > 0.80)
     .sort((a, b) => b.similarity - a.similarity);
 }

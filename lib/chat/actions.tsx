@@ -16,6 +16,7 @@ import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
 import { retrieveRelevantCaseStudies } from './retrieval'
 import CaseStudyDisplay from '@/components/CaseStudyDisplay'
+import { CaseStudy } from '@/types/case-study'
 
 export type { Message };
 
@@ -27,6 +28,7 @@ async function submitUserMessage(content: string) {
   'use server'
 
   const aiState = getMutableAIState<typeof AI>()
+  const relevantCaseStudies = await retrieveRelevantCaseStudies(content);
 
   aiState.update({
     ...aiState.get(),
@@ -40,7 +42,6 @@ async function submitUserMessage(content: string) {
     ]
   })
 
-  const relevantCaseStudies = await retrieveRelevantCaseStudies(content);
   let context = '';
 
   if (Array.isArray(relevantCaseStudies)) {
@@ -96,7 +97,8 @@ async function submitUserMessage(content: string) {
         {
           id: nanoid(),
           role: 'assistant',
-          content: fullContent
+          content: fullContent,
+          relevantCaseStudies
         }
       ]
     })
@@ -125,11 +127,15 @@ async function submitUserMessage(content: string) {
 export type AIState = {
   chatId: string
   messages: Message[]
+  relevantCaseStudies?: CaseStudy[]
 }
 
 export type UIState = {
+  content: any
   id: string
   display: React.ReactNode
+  role: 'user' | 'assistant'
+  relevantCaseStudies?: CaseStudy[]
 }[]
 
 export const AI = createAI<AIState, UIState>({
@@ -151,7 +157,7 @@ export const AI = createAI<AIState, UIState>({
         return uiState
       }
     } else {
-      return
+      return []
     }
   },
   onSetAIState: async ({ state }) => {
@@ -160,13 +166,13 @@ export const AI = createAI<AIState, UIState>({
     const session = await auth()
 
     if (session && session.user) {
-      const { chatId, messages } = state
+      const { chatId, messages, relevantCaseStudies } = state
 
       const createdAt = new Date()
       const userId = session.user.id as string
       const path = `/chat/${chatId}`
 
-      const firstMessageContent = messages[0].content as string
+      const firstMessageContent = messages[0]?.content as string || 'New Chat'
       const title = firstMessageContent.substring(0, 100)
 
       const chat: Chat = {
@@ -175,12 +181,11 @@ export const AI = createAI<AIState, UIState>({
         userId,
         createdAt,
         messages,
-        path
+        path,
+        relevantCaseStudies
       }
 
       await saveChat(chat)
-    } else {
-      return
     }
   }
 })
@@ -190,11 +195,14 @@ export const getUIStateFromAIState = (aiState: Chat) => {
     .filter(message => message.role !== 'system')
     .map((message, index) => ({
       id: `${aiState.chatId}-${index}`,
+      role: message.role,
+      content: message.content as string,
       display:
         message.role === 'user' ? (
           <UserMessage>{message.content as string}</UserMessage>
         ) : message.role === 'assistant' ? (
           <BotMessage content={message.content as string} />
-        ) : null
+        ) : null,
+      relevantCaseStudies: message.relevantCaseStudies
     }))
 }

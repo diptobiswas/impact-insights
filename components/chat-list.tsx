@@ -2,6 +2,8 @@ import { UIState } from '@/lib/chat/actions'
 import { Session } from '@/lib/types'
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
+import  CaseStudyDisplay  from '@/components/CaseStudyDisplay'
+import { CaseStudy } from '@/lib/types'
 
 export interface ChatList {
   messages: UIState
@@ -33,11 +35,12 @@ export function ChatList({ messages, session, isShared }: ChatList) {
         </div>
       ) : null}
 
-      {messages.map(message => (
+      {messages.map((message, index) => (
         <div key={message.id} className="mb-4">
-          {/* {message.spinner} */}
           {message.display}
-          {/* {message.attachments} */}
+          {message.role === 'assistant' && message.relevantCaseStudies && message.relevantCaseStudies.length > 0 && (
+            <CaseStudyDisplay caseStudies={message.relevantCaseStudies} />
+          )}
         </div>
       ))}
     </div>

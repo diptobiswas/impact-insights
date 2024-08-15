@@ -33,7 +33,7 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound()
   }
 
-  const uiState: UIState = getUIStateFromAIState(chat)
+  const uiState = getUIStateFromAIState(chat) as UIState;
 
   return (
     <>
@@ -43,7 +43,7 @@ export default async function SharePage({ params }: SharePageProps) {
             <div className="space-y-1 md:-mx-8">
               <h1 className="text-2xl font-bold">{chat.title}</h1>
               <div className="text-sm text-muted-foreground">
-                {formatDate(chat.createdAt)} · {chat.messages.length} messages
+                {formatDate(chat.createdAt ?? new Date())} · {chat.messages.length} messages
               </div>
             </div>
           </div>

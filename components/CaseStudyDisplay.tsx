@@ -1,11 +1,10 @@
 import React from 'react';
+import { CaseStudy } from '@/lib/types';
 
-interface CaseStudy {
-  title: string;
-  description: string;
-  domain: string;
-  link: string;
+interface CaseStudyDisplayProps {
+  caseStudies: CaseStudy[];
 }
+
 
 interface CaseStudyDisplayProps {
   caseStudies: CaseStudy[];
